@@ -1,24 +1,25 @@
-//package com.boot.gugi.config;
-//
-//import io.swagger.v3.oas.models.info.Info;
-//import io.swagger.v3.oas.models.Components;
-//import io.swagger.v3.oas.models.OpenAPI;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//
-//@Configuration
-//public class SwaggerConfig {
-//    @Bean
-//    public OpenAPI openAPI() {
-//        return new OpenAPI()
-//                .components(new Components())
-//                .info(apiInfo());
-//    }
-//
-//    private Info apiInfo() {
-//        return new Info()
-//                .title("CodeArena Swagger")
-//                .description("CodeArena 유저 및 인증 , ps, 알림에 관한 REST API")
-//                .version("1.0.0");
-//    }
-//}
+package com.boot.gugi.base.config;
+
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class SwaggerConfig {
+    @Bean
+    public OpenAPI openAPI() {
+        return new OpenAPI()
+                .components(new Components())
+                .info(apiInfo());
+    }
+
+    private Info apiInfo() {
+        return new Info()
+                .title("gugi API 명세서")
+                .description("야구 직관 서비스")
+                .version("v1.0.0-alpha");
+    }
+}
+
