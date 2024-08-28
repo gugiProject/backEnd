@@ -6,7 +6,7 @@ body:
   - type: input
     id: parentKey
     attributes:
-      label: 'BRANCH NAME'
+      label: '브랜치 이름(Branch)'
       description: 'branch name을 기입해주세요'
       placeholder: 'feature/'
     validations:
