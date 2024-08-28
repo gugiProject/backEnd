@@ -51,7 +51,7 @@ jobs:
           description: "${{ steps.md2jira.outputs.output-text }}"
 
       - name: Log created issue
-        run: echo "Jira Issue ${{ steps.issue-parser.outputs.parentKey }}/${{ steps.create.outputs.issue }} was created"
+        run: echo "Jira Issue ${{ steps.create.outputs.issue }} was created"
 
       - name: Checkout develop code
         uses: actions/checkout@v4
@@ -68,4 +68,4 @@ jobs:
         with:
           actions: "update-issue"
           token: ${{ secrets.GITHUB_TOKEN }}
-          title: "${{ steps.create.outputs.issue }} ${{ github.event.issue.title }}"
+          title: "$BRANCH_NAME ${{ github.event.issue.title }}"
