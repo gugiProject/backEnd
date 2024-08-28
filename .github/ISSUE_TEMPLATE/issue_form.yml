@@ -6,9 +6,9 @@ body:
   - type: input
     id: parentKey
     attributes:
-      label: '상위 작업 Ticket Number'
-      description: '상위 작업의 Ticket Number를 기입해주세요'
-      placeholder: 'DIAR-00'
+      label: 'BRANCH NAME'
+      description: 'branch name을 기입해주세요'
+      placeholder: 'feature/'
     validations:
       required: true
 
