@@ -60,8 +60,8 @@ jobs:
 
       - name: Create branch with Ticket number
         run: |
-          git checkout -b ${{ github.event.issue.title }}
-          git push origin ${{ github.event.issue.title }}
+          git checkout -b ${{ github.event.issue.body.attributes.label }}
+          git push origin ${{ github.event.issue.body.attributes.label }}
 
       - name: Update issue title
         uses: actions-cool/issues-helper@v3
