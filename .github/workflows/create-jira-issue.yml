@@ -55,7 +55,7 @@ jobs:
 
       - name: Set branch name
         id: set-branch
-        run: echo "BRANCH_NAME=${{ steps.issue-parser.outputs.issueparser_parentKey }}" >> $GITHUB_ENV
+        run: echo "BRANCH_NAME=[${{ steps.create.outputs.issue }}]${{ steps.issue-parser.outputs.issueparser_parentKey }}" >> $GITHUB_ENV
 
       - name: Checkout develop code
         uses: actions/checkout@v4
