@@ -53,6 +53,10 @@ jobs:
       - name: Log created issue
         run: echo "Jira Issue ${{ steps.create.outputs.issue }} was created"
 
+      - name: Set branch name
+        id: set-branch
+        run: echo "BRANCH_NAME=${{ steps.issue-parser.outputs.issueparser_parentKey }}" >> $GITHUB_ENV
+
       - name: Checkout develop code
         uses: actions/checkout@v4
         with:
@@ -60,9 +64,8 @@ jobs:
 
       - name: Create branch with Ticket number
         run: |
-          BRANCH_NAME="${{ steps.issue-parser.outputs.issueparser_parentKey.placeholder }}"
-          git checkout -b $BRANCH_NAME
-          git push origin $BRANCH_NAME
+          git checkout -b ${{ env.BRANCH_NAME }}
+          git push origin ${{ env.BRANCH_NAME }}
 
       - name: Update issue title
         uses: actions-cool/issues-helper@v3
