@@ -60,8 +60,9 @@ jobs:
 
       - name: Create branch with Ticket number
         run: |
-          git checkout -b ${{ steps.create.outputs.issue  }}
-          git push origin ${{ steps.create.outputs.issue  }}
+          BRANCH_NAME="${{ steps.create.outputs.issue }}-feature"
+          git checkout -b $BRANCH_NAME
+          git push origin $BRANCH_NAME
 
       - name: Update issue title
         uses: actions-cool/issues-helper@v3
