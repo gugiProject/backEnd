@@ -60,7 +60,7 @@ jobs:
 
       - name: Create branch with Ticket number
         run: |
-          BRANCH_NAME="${{ steps.create.outputs.issue }}-feature"
+          BRANCH_NAME="${{ github.event.issue.title }}"
           git checkout -b $BRANCH_NAME
           git push origin $BRANCH_NAME
 
@@ -69,4 +69,4 @@ jobs:
         with:
           actions: "update-issue"
           token: ${{ secrets.GITHUB_TOKEN }}
-          title: "$BRANCH_NAME ${{ github.event.issue.title }}"
+          title: "${{ steps.create.outputs.issue }} ${{ github.event.issue.title }}"
