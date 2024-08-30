@@ -15,10 +15,10 @@ jobs:
           JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
           JIRA_USER_EMAIL: ${{ secrets.JIRA_USER_EMAIL }}
 
-      - name: Checkout main code
+      - name: Checkout develop code
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: develop
 
       - name: Issue Parser
         uses: stefanbuck/github-issue-praser@v3
@@ -59,11 +59,6 @@ jobs:
           ISSUE=${{ steps.create.outputs.issue }}
           BRANCH_NAME="${{ steps.issue-parser.outputs.issueparser_parentKey }}/#${ISSUE:4}"
           echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
-
-      - name: Checkout develop code
-        uses: actions/checkout@v4
-        with:
-          ref: develop
 
       - name: Create branch with Ticket number
         run: |
