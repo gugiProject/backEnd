@@ -46,6 +46,8 @@ public class User {
     @Column
     private String profileImg;
 
+
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Trade> trades = new ArrayList<>();
 

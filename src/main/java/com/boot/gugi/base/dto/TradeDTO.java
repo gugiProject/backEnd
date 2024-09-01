@@ -12,10 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@NoArgsConstructor
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter
 public class TradeDTO {
     public static class TradeListDTO{
@@ -28,6 +27,8 @@ public class TradeDTO {
         private String thumbnail;
     }
 
+    @Data
+    @Builder
     public static class CreateTradeDTO{
 
         private Category category;
@@ -45,6 +46,8 @@ public class TradeDTO {
         private String contact;
     }
 
+    @Data
+    @Getter
     public static class DetailTradeDTO{
 
         private Long userId;

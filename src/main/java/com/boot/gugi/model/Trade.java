@@ -33,6 +33,8 @@ public class Trade {
     @JoinColumn(name = "user_id")
     private User user;
 
+
+    @Builder.Default
     @OneToMany(mappedBy = "trade", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TradeImage> images = new ArrayList<>();
 

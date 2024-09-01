@@ -3,6 +3,7 @@ package com.boot.gugi.controller;
 import com.boot.gugi.base.dto.TradeDTO;
 import com.boot.gugi.service.TradeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,41 +19,52 @@ public class TradeController {
 
     @GetMapping("/used")
     public ResponseEntity<List<TradeDTO.TradeListDTO>> getUsedPosts(){
+        List<TradeDTO.TradeListDTO> result = tradeService.getUsedPosts();
 
+        return ResponseEntity.ok().body(result);
     }
 
     @GetMapping("/rental")
     public ResponseEntity<List<TradeDTO.TradeListDTO>> getRentalPosts(){
+        List<TradeDTO.TradeListDTO> result = tradeService.getRentalPosts();
 
+        return ResponseEntity.ok().body(result);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<TradeDTO.TradeListDTO>> getSerach(@RequestParam String keyword){
+    public ResponseEntity<List<TradeDTO.TradeListDTO>> getSearch(@RequestParam String keyword){
+        List<TradeDTO.TradeListDTO> result = tradeService.getSearch(keyword);
 
+        return ResponseEntity.ok().body(result);
     }
 
     @GetMapping("/{tradeId}")
     public ResponseEntity<TradeDTO.DetailTradeDTO> getDetailPost(@PathVariable UUID tradeId){
-
+        TradeDTO.DetailTradeDTO result = tradeService.getDetailPost(tradeId);
+        return ResponseEntity.ok().body(result);
     }
 
     @PostMapping
-    public ResponseEntity<TradeDTO.DetailTradeDTO> createPost(@RequestPart Long userId, @RequestPart TradeDTO.CreateTradeDTO createTradeDTO, @RequestPart List<MultipartFile> images){
-
+    public ResponseEntity<TradeDTO.DetailTradeDTO> createPost(@RequestParam Long userId, @RequestPart TradeDTO.CreateTradeDTO createTradeDTO, @RequestPart List<MultipartFile> images){
+        TradeDTO.DetailTradeDTO result = tradeService.createPost(userId, createTradeDTO);
+        return ResponseEntity.ok().body(result);
     }
 
     @PatchMapping("/{tradeId}")
-    public ResponseEntity<TradeDTO.DetailTradeDTO> updatePost(@RequestPart Long userId, @PathVariable UUID tradeID, @RequestPart TradeDTO.CreateTradeDTO createTradeDTO, @RequestPart List<MultipartFile> images){
-
+    public ResponseEntity<TradeDTO.DetailTradeDTO> updatePost(@RequestParam Long userId, @PathVariable UUID tradeId, @RequestBody TradeDTO.CreateTradeDTO createTradeDTO){
+        TradeDTO.DetailTradeDTO result = tradeService.updatePost(userId, createTradeDTO);
+        return ResponseEntity.ok().body(result);
     }
 
     @DeleteMapping("/{tradeId}")
-    public ResponseEntity<Void> deletePost(@RequestParam Long userId, @PathVariable UUID tradeID){
-
+    public ResponseEntity<Void> deletePost(@RequestParam Long userId, @PathVariable UUID tradeId){
+        tradeService.deletePost(userId, tradeId);
+        return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/{tradeId}/status")
+    @PatchMapping("/status/{tradeId}")
     public ResponseEntity<Void> updateStatus(@RequestParam Long userId, @PathVariable UUID tradeId){
-
+        tradeService.updateStatus(userId, tradeId);
+        return ResponseEntity.ok().build();
     }
 }
