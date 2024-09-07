@@ -31,7 +31,7 @@ jobs:
           echo '${{ steps.issue-parser.outputs.jsonString }}'
 
       - name: Convert markdown to Jira Syntax
-        uses: peter-evans/jira2md@v2
+        uses: peter-evans/jira2md@v1
         id: md2jira
         with:
           input-text: |
@@ -57,7 +57,7 @@ jobs:
         id: set-branch
         run: |
           ISSUE=${{ steps.create.outputs.issue }}
-          BRANCH_NAME="${{ steps.issue-parser.outputs.issueparser_parentKey }}/#${ISSUE:4}"
+          BRANCH_NAME="${{ steps.issue-parser.outputs.issueparser_parentKey }}#${ISSUE:4}"
           echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
 
       - name: Create branch with Ticket number
