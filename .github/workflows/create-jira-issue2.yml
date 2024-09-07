@@ -1,0 +1,80 @@
+name: Create Jira issue
+on:
+  issues:
+    types:
+      - opened
+jobs:
+  create-issue:
+    name: Create Jira issue
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout develop code
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+
+      - name: Issue Parser
+        uses: stefanbuck/github-issue-praser@v3
+        id: issue-parser
+        with:
+          template-path: .github/ISSUE_TEMPLATE/issue_form.yml
+
+      - name: Log Issue Parser
+        run: |
+          echo '${{ steps.issue-parser.outputs.jsonString }}'
+
+      - name: Convert markdown to Jira Syntax
+        uses: peter-evans/jira2md@v2
+        id: md2jira
+        with:
+          input-text: |
+            ### Github Issue Link
+            - ${{ github.event.issue.html_url }}
+
+            ${{ github.event.issue.body }}
+          mode: md2jira
+
+      - name: Create Jira Issue with curl
+        id: create-issue
+        run: |
+          curl -X POST -u ${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }} \
+          -H "Content-Type: application/json" \
+          -d '{
+                "fields": {
+                  "project": { "key": "KAN" },
+                  "issuetype": { "name": "Task" },
+                  "summary": "${{ github.event.issue.title }}",
+                  "description": "${{ steps.md2jira.outputs.output-text }}"
+                }
+              }' \
+          ${{ secrets.JIRA_BASE_URL }}/rest/api/2/issue/ \
+          -o response.json
+
+      - name: Log created Jira issue
+        run: |
+          echo "Jira Issue created with response:"
+          cat response.json
+
+      - name: Extract Jira Issue Key
+        id: extract-issue-key
+        run: |
+          ISSUE_KEY=$(jq -r '.key' response.json)
+          echo "ISSUE_KEY=${ISSUE_KEY}" >> $GITHUB_ENV
+
+      - name: Set branch name
+        id: set-branch
+        run: |
+          BRANCH_NAME="${{ steps.issue-parser.outputs.issueparser_parentKey }}/#${ISSUE_KEY:4}"
+          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
+
+      - name: Create branch with Ticket number
+        run: |
+          git checkout -b ${{ env.BRANCH_NAME }}
+          git push origin ${{ env.BRANCH_NAME }}
+
+      - name: Update GitHub issue title
+        uses: actions-cool/issues-helper@v3
+        with:
+          actions: "update-issue"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "[${{ env.ISSUE_KEY }}] ${{ github.event.issue.title }}"
