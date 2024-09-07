@@ -8,6 +8,11 @@ jobs:
     name: Create Jira issue
     runs-on: ubuntu-latest
     steps:
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          
       - name: Login
         uses: atlassian/gajira-login@v3
         env:
