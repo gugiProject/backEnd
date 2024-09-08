@@ -39,7 +39,14 @@ jobs:
         run: |
           RESPONSE=$(curl -s -o response.json -w "%{http_code}" -X POST -u ${{ secrets.JIRA_USER_EMAIL }}:${{ secrets.JIRA_API_TOKEN }} \
           -H "Content-Type: application/json" \
-          -d "$JSON_DATA" \
+          -d '{
+                "fields": {
+                  "project": { "key": "KAN" },
+                  "issuetype": { "name": "Task" },
+                  "summary": "${{ github.event.issue.title }}",
+                  "description": "${{ steps.md2jira.outputs.output-text }}"
+                }
+              }' \
           ${{ secrets.JIRA_BASE_URL }}/rest/api/2/issue/)
       
           echo "Response Code: $RESPONSE"
