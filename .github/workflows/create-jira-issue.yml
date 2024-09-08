@@ -29,7 +29,7 @@ jobs:
       - name: Log Issue Parser
         run: |
           echo '${{ steps.issue-parser.outputs.jsonString }}'
-          BRANCH_NAME=$(echo '${{ steps.parser.outputs.json }}' | jq -r '._branch')
+          BRANCH_NAME=$(echo '${{ steps.issue-parser.outputs.jsonString }}' | jq -r '._branch')
           echo 'BRANCH_NAME=${BRANCH_NAME}'
 
       - name: Convert markdown to Jira Syntax
