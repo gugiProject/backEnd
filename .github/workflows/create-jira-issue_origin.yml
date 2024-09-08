@@ -57,7 +57,7 @@ jobs:
         id: set-branch
         run: |
           ISSUE=${{ steps.create.outputs.issue }}
-          BRANCH_NAME="${{ steps.issue-parser.outputs.issueparser_branchName }}/#${ISSUE:4}"
+          BRANCH_NAME="${{ steps.issue-parser.outputs.__branch }}/#${ISSUE:4}"
           echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
 
       - name: Create branch with Ticket number
