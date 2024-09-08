@@ -30,8 +30,7 @@ jobs:
         run: |
           echo '${{ steps.issue-parser.outputs.jsonString }}'
           echo '${{ steps.issue-parser.outputs.jsonString }}' | jq -r '._branch' > branch_name.txt
-          BRANCH=$(cat branch_name.txt)
-          echo "BRANCH=${BRANCH}" >> $GITHUB_ENV
+          echo "BRANCH=$(cat branch_name.txt)" >> $GITHUB_ENV
           echo "Branch is ${{ env.BRANCH }}"
 
       - name: Convert markdown to Jira Syntax
