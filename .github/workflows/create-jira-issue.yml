@@ -30,8 +30,9 @@ jobs:
         run: |
           echo '${{ steps.issue-parser.outputs.jsonString }}'
           echo '${{ steps.issue-parser.outputs.jsonString }}' | jq -r '._branch' > branch_name.txt
-          BRANCH_NAME=$(cat branch_name.txt)
-          echo "BRANCH_NAME=${BRANCH_NAME}"
+          BRANCH=$(cat branch_name.txt)
+          echo "BRANCH=${BRANCH}" >> $GITHUB_ENV
+          echo "Branch is ${{ env.BRANCH }}"
 
       - name: Convert markdown to Jira Syntax
         uses: peter-evans/jira2md@v1
@@ -62,7 +63,6 @@ jobs:
           ISSUE=${{ steps.create.outputs.issue }}
           BRANCH_NAME="${{ steps.issue-parser.outputs._branch }}/#${ISSUE:4}"
           echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
-          echo "Branch name is ${{ env.BRANCH_NAME }}"
 
       - name: Create branch with Ticket number
         run: |
