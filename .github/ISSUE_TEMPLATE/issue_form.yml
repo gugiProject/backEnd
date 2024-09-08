@@ -4,7 +4,7 @@ labels: [order]
 title: '이슈 이름을 작성해주세요'
 body:
   - type: input
-    id: parentKey
+    id: branchName
     attributes:
       label: '브랜치 이름(Branch)'
       description: 'branch name을 기입해주세요'
