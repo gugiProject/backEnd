@@ -32,6 +32,7 @@ public class User {
     private String email;
 
     @Column(nullable=false)
+    @Enumerated(EnumType.ORDINAL)
     private Sex sex;
 
     @Column(nullable=false)
@@ -41,6 +42,7 @@ public class User {
     private String nickName;
 
     @Column(nullable=false)
+    @Enumerated(EnumType.ORDINAL)
     private Team team;
 
     @Column

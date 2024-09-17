@@ -39,6 +39,7 @@ public class Trade {
     private List<TradeImage> images = new ArrayList<>();
 
     @Column(nullable=false)
+    @Enumerated(EnumType.ORDINAL)
     private Category category;
 
     @Column(nullable=false)
@@ -49,9 +50,10 @@ public class Trade {
 
     @Column(nullable=false)
     private Integer price;
-
+    @Builder.Default
     @Column(nullable=false)
-    private TradeStatus status;
+    @Enumerated(EnumType.ORDINAL)
+    private TradeStatus status = TradeStatus.ING;
 
     @Column(nullable=false)
     private List<TradeMethod> methods;

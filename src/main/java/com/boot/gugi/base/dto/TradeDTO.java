@@ -17,6 +17,8 @@ import java.util.UUID;
 @Builder
 @Getter
 public class TradeDTO {
+    @Data
+    @Setter
     public static class TradeListDTO{
         private UUID tradeId;
         private String title;

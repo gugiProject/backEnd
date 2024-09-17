@@ -45,14 +45,14 @@ public class TradeController {
     }
 
     @PostMapping
-    public ResponseEntity<TradeDTO.DetailTradeDTO> createPost(@RequestParam Long userId, @RequestPart TradeDTO.CreateTradeDTO createTradeDTO, @RequestPart List<MultipartFile> images){
-        TradeDTO.DetailTradeDTO result = tradeService.createPost(userId, createTradeDTO);
+    public ResponseEntity<UUID> createPost(@RequestParam Long userId, @RequestPart TradeDTO.CreateTradeDTO createTradeDTO, @RequestPart List<MultipartFile> images){
+        UUID result = tradeService.createPost(userId, createTradeDTO);
         return ResponseEntity.ok().body(result);
     }
 
     @PatchMapping("/{tradeId}")
-    public ResponseEntity<TradeDTO.DetailTradeDTO> updatePost(@RequestParam Long userId, @PathVariable UUID tradeId, @RequestBody TradeDTO.CreateTradeDTO createTradeDTO){
-        TradeDTO.DetailTradeDTO result = tradeService.updatePost(userId, createTradeDTO);
+    public ResponseEntity<UUID> updatePost(@RequestParam Long userId, @PathVariable UUID tradeId, @RequestPart TradeDTO.CreateTradeDTO updateTradeDTO){
+        UUID result = tradeService.updatePost(userId, tradeId, updateTradeDTO);
         return ResponseEntity.ok().body(result);
     }
 
