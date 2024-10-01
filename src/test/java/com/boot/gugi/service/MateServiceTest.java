@@ -136,4 +136,6 @@ public class MateServiceTest {
         assertThat(updatedPost.getStadium()).isEqualTo(Stadium.SUWON);
         assertThat(updatedPost.getTeam()).isEqualTo(Team.KIA);
     }
+
+
 }

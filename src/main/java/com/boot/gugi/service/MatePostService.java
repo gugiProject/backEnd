@@ -4,6 +4,7 @@ import com.boot.gugi.base.Enum.MateStatus;
 import com.boot.gugi.base.dto.MateRequestDTO;
 import com.boot.gugi.base.dto.MateResponseDTO;
 import com.boot.gugi.base.dto.MateSearchDTO;
+import com.boot.gugi.exception.MatePostException;
 import com.boot.gugi.model.MatePostApplicant;
 import com.boot.gugi.model.MatePostStatus;
 import com.boot.gugi.model.MatePost;
@@ -97,10 +98,14 @@ public class MatePostService {
     public void applyForMatePost(MateRequestDTO mateRequestDTO) {
 
         MatePost matePost = matePostRepository.findById(mateRequestDTO.getPostId())
-                .orElseThrow(() -> new RuntimeException("게시물이 존재하지 않습니다."));
+                .orElseThrow(() -> new MatePostException("게시물이 존재하지 않습니다."));
 
         User applicant = userRepository.findById(mateRequestDTO.getUserId())
-                .orElseThrow(() -> new RuntimeException("신청자가 존재하지 않습니다."));
+                .orElseThrow(() -> new MatePostException("신청자가 존재하지 않습니다."));
+
+        if (applicant.getId().equals(matePost.getOwner().getId())) {
+            throw new MatePostException("작성자는 자신의 게시물에 신청할 수 없습니다.");
+        }
 
         MatePostApplicant applicantEntry = new MatePostApplicant();
         applicantEntry.setMatePost(matePost);
@@ -119,11 +124,11 @@ public class MatePostService {
 
     public void approveApplication(MateResponseDTO response) {
         MatePostApplicant applicant = applicantRepository.findByApplicantIdAndMatePostId(response.getUserId(), response.getPostId())
-                .orElseThrow(() -> new RuntimeException("신청자가 존재하지 않거나, 게시물 ID가 일치하지 않습니다."));
+                .orElseThrow(() -> new MatePostException("신청자가 존재하지 않거나, 게시물이 일치하지 않습니다."));
 
         MatePost matePost = applicant.getMatePost();
         if (matePost.getParticipants() >= matePost.getTotalMembers()) {
-            throw new RuntimeException("모집이 이미 완료되었습니다. 더 이상 신청을 승인할 수 없습니다.");
+            throw new MatePostException("모집이 이미 완료되었습니다. 더 이상 신청을 승인할 수 없습니다.");
         }
 
         applicant.setStatus(MateStatus.APPROVED);
@@ -132,7 +137,7 @@ public class MatePostService {
         matePostRepository.save(matePost);
 
         MatePostStatus existingStatus = matePostStatusRepository.findByUserAndMatePost(applicant.getApplicant(), matePost)
-                .orElseThrow(() -> new RuntimeException("게시물 상태가 존재하지 않습니다."));
+                .orElseThrow(() -> new MatePostException("게시물 상태가 존재하지 않습니다."));
 
         existingStatus.setPostStatus(MateStatus.APPROVED);
         matePostStatusRepository.save(existingStatus);
@@ -140,13 +145,13 @@ public class MatePostService {
 
     public void rejectApplication(MateResponseDTO response) {
         MatePostApplicant applicant = applicantRepository.findByApplicantIdAndMatePostId(response.getUserId(), response.getPostId())
-                .orElseThrow(() -> new RuntimeException("신청자가 존재하지 않거나, 게시물 ID가 일치하지 않습니다."));
+                .orElseThrow(() -> new MatePostException("신청자가 존재하지 않거나, 게시물이 일치하지 않습니다."));
 
         applicant.setStatus(MateStatus.REJECTED);
         applicantRepository.save(applicant);
 
         MatePostStatus existingStatus = matePostStatusRepository.findByUserAndMatePost(applicant.getApplicant(), applicant.getMatePost())
-                .orElseThrow(() -> new RuntimeException("게시물 상태가 존재하지 않습니다."));
+                .orElseThrow(() -> new MatePostException("게시물 상태가 존재하지 않습니다."));
 
         existingStatus.setPostStatus(MateStatus.REJECTED);
         matePostStatusRepository.save(existingStatus);
