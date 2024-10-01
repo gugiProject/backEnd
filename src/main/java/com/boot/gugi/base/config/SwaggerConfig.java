@@ -14,7 +14,6 @@ public class SwaggerConfig {
                 .components(new Components())
                 .info(apiInfo());
     }
-
     private Info apiInfo() {
         return new Info()
                 .title("gugi API 명세서")
