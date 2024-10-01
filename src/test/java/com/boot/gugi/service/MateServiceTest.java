@@ -33,9 +33,6 @@ import java.time.LocalDate;
 public class MateServiceTest {
 
     @Autowired
-    private MatePostRepository matePostRepository;
-
-    @Autowired
     private MatePostStatusRepository matePostStatusRepository;
 
     @Autowired
