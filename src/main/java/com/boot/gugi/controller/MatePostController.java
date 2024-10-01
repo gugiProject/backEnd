@@ -58,7 +58,6 @@ public class MatePostController {
 
     @PostMapping("/apply")
     public ResponseEntity<Void> applyForMatePost(@RequestBody MateRequestDTO mateRequestDTO) {
-
         mateService.applyForMatePost(mateRequestDTO);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
