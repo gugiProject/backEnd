@@ -19,12 +19,16 @@ public class MatePostApplicant {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "mate_id")
+    @JoinColumn(name = "post_id", nullable = false)
     private MatePost matePost;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User applicant;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

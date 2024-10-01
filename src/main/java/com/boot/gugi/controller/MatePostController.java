@@ -1,5 +1,7 @@
 package com.boot.gugi.controller;
 
+import com.boot.gugi.base.dto.MateRequestDTO;
+import com.boot.gugi.base.dto.MateResponseDTO;
 import com.boot.gugi.model.MatePost;
 import com.boot.gugi.base.dto.MateDTO;
 import com.boot.gugi.base.dto.MateSearchDTO;
@@ -54,4 +56,22 @@ public class MatePostController {
         return ResponseEntity.ok(posts);
     }
 
+    @PostMapping("/apply")
+    public ResponseEntity<Void> applyForMatePost(@RequestBody MateRequestDTO mateRequestDTO) {
+
+        mateService.applyForMatePost(mateRequestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PatchMapping("/approve")
+    public ResponseEntity<Void> approveApplication(@RequestBody MateResponseDTO response) {
+        mateService.approveApplication(response);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/reject")
+    public ResponseEntity<Void> rejectApplication(@RequestBody MateResponseDTO response) {
+        mateService.rejectApplication(response);
+        return ResponseEntity.ok().build();
+    }
 }

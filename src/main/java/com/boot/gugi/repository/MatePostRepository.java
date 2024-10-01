@@ -20,5 +20,4 @@ public interface MatePostRepository extends JpaRepository<MatePost, Long>, MateP
     List<MatePost> findAllByConditions(
             Date date, GenderPreference gender, AgeGroup ageGroup, String team, int group, Stadium stadium, Sort sort);
      */
-
 }

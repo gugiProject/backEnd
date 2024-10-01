@@ -1,15 +1,15 @@
 package com.boot.gugi.service;
 
 import com.boot.gugi.base.Enum.MateStatus;
+import com.boot.gugi.base.dto.MateRequestDTO;
+import com.boot.gugi.base.dto.MateResponseDTO;
 import com.boot.gugi.base.dto.MateSearchDTO;
+import com.boot.gugi.model.MatePostApplicant;
 import com.boot.gugi.model.MatePostStatus;
 import com.boot.gugi.model.MatePost;
 import com.boot.gugi.base.dto.MateDTO;
 import com.boot.gugi.model.User;
-import com.boot.gugi.repository.MatePostRepository;
-import com.boot.gugi.repository.MatePostRepositoryCustom;
-import com.boot.gugi.repository.MatePostStatusRepository;
-import com.boot.gugi.repository.UserRepository;
+import com.boot.gugi.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -29,17 +29,21 @@ public class MatePostService {
     private final MatePostRepositoryCustom matePostRepositoryCustom;
     private final MatePostStatusRepository matePostStatusRepository;
     private final UserRepository userRepository;
+    private final MatePostApplicantRepository applicantRepository;
+
     UserService userService;
 
     @Autowired
     public MatePostService(@Qualifier("matePostRepository") MatePostRepository mateRepository,
                            @Qualifier("matePostRepositoryCustomImpl") MatePostRepositoryCustom matePostRepositoryCustom,
                            MatePostStatusRepository matePostStatusRepository,
-                           UserRepository userRepository) {
+                           UserRepository userRepository,
+                           MatePostApplicantRepository applicantRepository) {
         this.matePostRepository = mateRepository;
         this.matePostRepositoryCustom = matePostRepositoryCustom;
         this.matePostStatusRepository = matePostStatusRepository;
         this.userRepository = userRepository;
+        this.applicantRepository = applicantRepository;
     }
 
     private MatePost fromDTO(MateDTO dto, User owner) {
@@ -88,6 +92,64 @@ public class MatePostService {
         existingPost.setUpdatedTimeAt(LocalDateTime.now());
 
         return matePostRepository.save(existingPost);
+    }
+
+    public void applyForMatePost(MateRequestDTO mateRequestDTO) {
+
+        MatePost matePost = matePostRepository.findById(mateRequestDTO.getPostId())
+                .orElseThrow(() -> new RuntimeException("게시물이 존재하지 않습니다."));
+
+        User applicant = userRepository.findById(mateRequestDTO.getUserId())
+                .orElseThrow(() -> new RuntimeException("신청자가 존재하지 않습니다."));
+
+        MatePostApplicant applicantEntry = new MatePostApplicant();
+        applicantEntry.setMatePost(matePost);
+        applicantEntry.setApplicant(applicant);
+        applicantEntry.setOwner(matePost.getOwner());
+        applicantEntry.setStatus(MateStatus.PENDING);
+        applicantEntry.setApplicationDate(LocalDateTime.now());
+        applicantRepository.save(applicantEntry);
+
+        MatePostStatus postStatus = new MatePostStatus();
+        postStatus.setMatePost(matePost);
+        postStatus.setUser(applicant);
+        postStatus.setPostStatus(MateStatus.PENDING);
+        matePostStatusRepository.save(postStatus);
+    }
+
+    public void approveApplication(MateResponseDTO response) {
+        MatePostApplicant applicant = applicantRepository.findByApplicantIdAndMatePostId(response.getUserId(), response.getPostId())
+                .orElseThrow(() -> new RuntimeException("신청자가 존재하지 않거나, 게시물 ID가 일치하지 않습니다."));
+
+        MatePost matePost = applicant.getMatePost();
+        if (matePost.getParticipants() >= matePost.getTotalMembers()) {
+            throw new RuntimeException("모집이 이미 완료되었습니다. 더 이상 신청을 승인할 수 없습니다.");
+        }
+
+        applicant.setStatus(MateStatus.APPROVED);
+        applicantRepository.save(applicant);
+        matePost.setParticipants(matePost.getParticipants() + 1);
+        matePostRepository.save(matePost);
+
+        MatePostStatus existingStatus = matePostStatusRepository.findByUserAndMatePost(applicant.getApplicant(), matePost)
+                .orElseThrow(() -> new RuntimeException("게시물 상태가 존재하지 않습니다."));
+
+        existingStatus.setPostStatus(MateStatus.APPROVED);
+        matePostStatusRepository.save(existingStatus);
+    }
+
+    public void rejectApplication(MateResponseDTO response) {
+        MatePostApplicant applicant = applicantRepository.findByApplicantIdAndMatePostId(response.getUserId(), response.getPostId())
+                .orElseThrow(() -> new RuntimeException("신청자가 존재하지 않거나, 게시물 ID가 일치하지 않습니다."));
+
+        applicant.setStatus(MateStatus.REJECTED);
+        applicantRepository.save(applicant);
+
+        MatePostStatus existingStatus = matePostStatusRepository.findByUserAndMatePost(applicant.getApplicant(), applicant.getMatePost())
+                .orElseThrow(() -> new RuntimeException("게시물 상태가 존재하지 않습니다."));
+
+        existingStatus.setPostStatus(MateStatus.REJECTED);
+        matePostStatusRepository.save(existingStatus);
     }
 
     public List<MatePost> getLatestMatePosts(Long cursorId, int size) {

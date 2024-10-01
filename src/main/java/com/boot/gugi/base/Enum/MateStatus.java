@@ -4,8 +4,7 @@ public enum MateStatus {
     CREATOR,
     PENDING,
     APPROVED,
-    REJECTED,
-    FULL;
+    REJECTED;
 
     @Override
     public String toString() {
@@ -14,7 +13,6 @@ public enum MateStatus {
             case PENDING: return "대기";
             case APPROVED: return "승인";
             case REJECTED: return "거부";
-            case FULL: return "모집완료";
             default: throw new IllegalArgumentException();
         }
     }
