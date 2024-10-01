@@ -1,12 +1,18 @@
 package com.boot.gugi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import com.boot.gugi.base.Enum.*;
 import com.boot.gugi.base.dto.MateDTO;
+import com.boot.gugi.base.dto.MateRequestDTO;
+import com.boot.gugi.base.dto.MateResponseDTO;
+import com.boot.gugi.exception.MatePostException;
 import com.boot.gugi.model.MatePost;
+import com.boot.gugi.model.MatePostApplicant;
 import com.boot.gugi.model.MatePostStatus;
 import com.boot.gugi.model.User;
+import com.boot.gugi.repository.MatePostApplicantRepository;
 import com.boot.gugi.repository.MatePostRepository;
 import com.boot.gugi.repository.MatePostStatusRepository;
 import com.boot.gugi.repository.UserRepository;
@@ -36,15 +42,20 @@ public class MateServiceTest {
     private UserRepository userRepository;
 
     @Autowired
+    private MatePostApplicantRepository applicantRepository;
+
+    @Autowired
     private MatePostService matePostService;
 
     private User owner;
+    private User applicant;
     private MatePost createdPost;
 
     @BeforeEach
     public void setUp() {
         // Given User
         owner = createUser("김구기", "test@example.com", Sex.FEMALE, 25, Team.SAMSUNG);
+        applicant = createUser("이철수", "applicant@example.com", Sex.MALE, 29, Team.SAMSUNG);
     }
 
     private User createUser(String name, String email, Sex gender, int age, Team team) {
@@ -82,7 +93,7 @@ public class MateServiceTest {
     }
 
     @Test
-    @DisplayName("직관메이트 post 생성")
+    @DisplayName("직관메이트 글 생성")
     public void createMatePostTest() {
         // Given
         createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 0, 4,
@@ -106,7 +117,7 @@ public class MateServiceTest {
     }
 
     @Test
-    @DisplayName("직관메이트 post 수정")
+    @DisplayName("직관메이트 글 수정")
     public void updateMatePostTest() {
         // Given
         createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 0, 4,
@@ -137,5 +148,139 @@ public class MateServiceTest {
         assertThat(updatedPost.getTeam()).isEqualTo(Team.KIA);
     }
 
+    @Test
+    @DisplayName("직관메이트 매칭 신청")
+    public void applyForMatePostTest() {
+        // Given
+        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 0, 4,
+                LocalDate.now().plusDays(1), Stadium.DAEGU,
+                GenderPreference.FEMALE_ONLY, AgeGroup.AGE_20s, Team.SAMSUNG, owner);
+
+        MateRequestDTO requestDTO = new MateRequestDTO();
+        requestDTO.setPostId(createdPost.getId());
+        requestDTO.setUserId(applicant.getId());
+
+        // When
+        matePostService.applyForMatePost(requestDTO);
+
+        // Then
+        MatePostApplicant applicantEntry = applicantRepository.findByApplicantIdAndMatePostId(applicant.getId(), createdPost.getId())
+                .orElse(null);
+        assertThat(applicantEntry).isNotNull();
+        assertThat(applicantEntry.getStatus()).isEqualTo(MateStatus.PENDING);
+        assertThat(applicantEntry.getMatePost().getId()).isEqualTo(createdPost.getId());
+        assertThat(applicantEntry.getApplicant().getId()).isEqualTo(applicant.getId());
+
+        MatePostStatus postStatus = matePostStatusRepository.findByUser(applicant).stream().findFirst().orElse(null);
+        assertThat(postStatus).isNotNull();
+        assertThat(postStatus.getPostStatus()).isEqualTo(MateStatus.PENDING);
+        assertThat(postStatus.getMatePost().getId()).isEqualTo(createdPost.getId());
+        assertThat(postStatus.getUser().getId()).isEqualTo(applicant.getId());
+    }
+
+    @Test
+    @DisplayName("직관메이트 매칭 신청 - 본인 글 신청 에러")
+    public void applyForMatePost_OwnerCannotApplyTest() {
+        // Given
+        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 0, 4,
+                LocalDate.now().plusDays(1), Stadium.DAEGU,
+                GenderPreference.FEMALE_ONLY, AgeGroup.AGE_20s, Team.SAMSUNG, owner);
+
+        MateRequestDTO requestDTO = new MateRequestDTO();
+        requestDTO.setPostId(createdPost.getId());
+        requestDTO.setUserId(owner.getId());
+
+        // When & Then
+        assertThatThrownBy(() -> matePostService.applyForMatePost(requestDTO))
+                .isInstanceOf(MatePostException.class)
+                .hasMessage("작성자는 자신의 게시물에 신청할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("직관메이트 매칭 승인")
+    public void approveApplicationTest() {
+        // Given
+        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 0, 4,
+                LocalDate.now().plusDays(1), Stadium.DAEGU,
+                GenderPreference.FEMALE_ONLY, AgeGroup.AGE_20s, Team.SAMSUNG, owner);
+
+        MateRequestDTO requestDTO = new MateRequestDTO();
+        requestDTO.setPostId(createdPost.getId());
+        requestDTO.setUserId(applicant.getId());
+        matePostService.applyForMatePost(requestDTO);
+
+        MateResponseDTO responseDTO = new MateResponseDTO();
+        responseDTO.setPostId(createdPost.getId());
+        responseDTO.setUserId(applicant.getId());
+
+        // When
+        matePostService.approveApplication(responseDTO);
+
+        // Then
+        MatePostApplicant applicantEntry = applicantRepository.findByApplicantIdAndMatePostId(applicant.getId(), createdPost.getId())
+                .orElse(null);
+        assertThat(applicantEntry).isNotNull();
+        assertThat(applicantEntry.getStatus()).isEqualTo(MateStatus.APPROVED);
+
+        MatePostStatus postStatus = matePostStatusRepository.findByUser(applicant).stream().findFirst().orElse(null);
+        assertThat(postStatus).isNotNull();
+        assertThat(postStatus.getPostStatus()).isEqualTo(MateStatus.APPROVED);
+        assertThat(createdPost.getParticipants()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("직관메이트 신청 승인 - 모집 완료 에러")
+    public void approveApplication_PostFullTest() {
+        // Given
+        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 0, 4,
+                LocalDate.now().plusDays(1), Stadium.DAEGU,
+                GenderPreference.FEMALE_ONLY, AgeGroup.AGE_20s, Team.SAMSUNG, owner);
+
+        createdPost.setParticipants(4);
+        MateRequestDTO requestDTO = new MateRequestDTO();
+        requestDTO.setPostId(createdPost.getId());
+        requestDTO.setUserId(applicant.getId());
+        matePostService.applyForMatePost(requestDTO);
+
+        MateResponseDTO responseDTO = new MateResponseDTO();
+        responseDTO.setPostId(createdPost.getId());
+        responseDTO.setUserId(applicant.getId());
+
+        // When & Then
+        assertThatThrownBy(() -> matePostService.approveApplication(responseDTO))
+                .isInstanceOf(MatePostException.class)
+                .hasMessage("모집이 이미 완료되었습니다. 더 이상 신청을 승인할 수 없습니다.");
+    }
+
+    @Test
+    @DisplayName("직관메이트 신청 거절")
+    public void rejectApplicationTest() {
+        // Given
+        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 0, 4,
+                LocalDate.now().plusDays(1), Stadium.DAEGU,
+                GenderPreference.FEMALE_ONLY, AgeGroup.AGE_20s, Team.SAMSUNG, owner);
+
+        MateRequestDTO requestDTO = new MateRequestDTO();
+        requestDTO.setPostId(createdPost.getId());
+        requestDTO.setUserId(applicant.getId());
+        matePostService.applyForMatePost(requestDTO);
+
+        MateResponseDTO responseDTO = new MateResponseDTO();
+        responseDTO.setPostId(createdPost.getId());
+        responseDTO.setUserId(applicant.getId());
+
+        // When
+        matePostService.rejectApplication(responseDTO);
+
+        // Then
+        MatePostApplicant applicantEntry = applicantRepository.findByApplicantIdAndMatePostId(applicant.getId(), createdPost.getId())
+                .orElse(null);
+        assertThat(applicantEntry).isNotNull();
+        assertThat(applicantEntry.getStatus()).isEqualTo(MateStatus.REJECTED);
+
+        MatePostStatus postStatus = matePostStatusRepository.findByUser(applicant).stream().findFirst().orElse(null);
+        assertThat(postStatus).isNotNull();
+        assertThat(postStatus.getPostStatus()).isEqualTo(MateStatus.REJECTED);
+    }
 
 }
