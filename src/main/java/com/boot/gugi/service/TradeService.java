@@ -60,8 +60,17 @@ public class TradeService {
     }
 
     public List<TradeDTO.TradeListDTO> getSearch(String keyword){
-        List<TradeDTO.TradeListDTO> result = new ArrayList<>();
-        return result;
+        if(keyword.length()<=2){
+            throw new RuntimeException();
+        }
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("tradeId"));
+        List<Trade> lists = tradeRepository.findByTitleContaining(keyword);
+
+        return lists.stream()
+                .map(this::convertToListDTO)
+                .collect(Collectors.toList());
+
     }
 
     public TradeDTO.DetailTradeDTO getDetailPost(UUID tradeId){

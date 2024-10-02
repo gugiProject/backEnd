@@ -11,4 +11,6 @@ import java.util.UUID;
 public interface TradeRepository extends JpaRepository<Trade, UUID> {
     Optional<Trade> findByTradeId(UUID tradeId);
     List<Trade> findByCategory(Category category);
+
+    List<Trade> findByTitleContaining(String keyword);
 }

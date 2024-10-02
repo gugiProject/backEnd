@@ -51,7 +51,7 @@ public class TradeController {
     }
 
     @PatchMapping("/{tradeId}")
-    public ResponseEntity<UUID> updatePost(@RequestParam Long userId, @PathVariable UUID tradeId, @RequestPart TradeDTO.CreateTradeDTO updateTradeDTO){
+    public ResponseEntity<UUID> updatePost(@RequestParam Long userId, @PathVariable UUID tradeId, @RequestBody TradeDTO.CreateTradeDTO updateTradeDTO){
         UUID result = tradeService.updatePost(userId, tradeId, updateTradeDTO);
         return ResponseEntity.ok().body(result);
     }

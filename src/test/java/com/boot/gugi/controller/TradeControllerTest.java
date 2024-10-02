@@ -240,7 +240,7 @@ class TradeControllerTest {
                 .file(tradeDTOFile)
                 .file(image1)
                 .file(image2)
-                .param("userId", String.valueOf(1L))
+                .param("userId", String.valueOf(user.getUserId()))
                 .contentType(MediaType.MULTIPART_FORM_DATA));
 
         // then
@@ -287,11 +287,12 @@ class TradeControllerTest {
                 .contact("Example Contact")
                 .build();
 
-        String json = new ObjectMapper().writeValueAsString(updateTradeDTO);
+        String json = new ObjectMapper().registerModule(new JavaTimeModule()).writeValueAsString(updateTradeDTO);
+
 
         // when
         ResultActions resultActions = mockMvc.perform(patch("/api/v1/trade/" + tradeId)
-                .param("userId", String.valueOf(1L))
+                .param("userId", String.valueOf(user.getUserId()))
                 .content(json)
                 .contentType(MediaType.APPLICATION_JSON));
 
@@ -332,7 +333,7 @@ class TradeControllerTest {
 
         // when
         ResultActions resultActions = mockMvc.perform(patch("/api/v1/trade/status/" + tradeId)
-                .param("userId", String.valueOf(1L)));
+                .param("userId", String.valueOf(user.getUserId())));
 
         // then
         resultActions.andExpect(status().isOk());
@@ -370,7 +371,7 @@ class TradeControllerTest {
 
         // when
         ResultActions resultActions = mockMvc.perform(delete("/api/v1/trade/" + tradeId)
-                .param("userId", String.valueOf(1L)));
+                .param("userId", String.valueOf(user.getUserId())));
 
         // then
         resultActions.andExpect(status().isOk());
