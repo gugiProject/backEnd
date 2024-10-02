@@ -21,10 +21,9 @@ import java.util.UUID;
 @Table(name="user")
 public class User {
 
-    @Id @GeneratedValue(generator = "uuid2")
-    @GenericGenerator(name="uuid2", strategy = "uuid2")
-    @Column(columnDefinition = "BINARY(16)")
-    private UUID userId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long userId;
 
     @Column(nullable=false)
     private String name;
@@ -33,6 +32,7 @@ public class User {
     private String email;
 
     @Column(nullable=false)
+    @Enumerated(EnumType.ORDINAL)
     private Sex sex;
 
     @Column(nullable=false)
@@ -42,11 +42,14 @@ public class User {
     private String nickName;
 
     @Column(nullable=false)
+    @Enumerated(EnumType.ORDINAL)
     private Team team;
 
     @Column
     private String profileImg;
 
+
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Trade> trades = new ArrayList<>();
 

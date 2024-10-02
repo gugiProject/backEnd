@@ -8,11 +8,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.GenericGenerator;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
 
 @Data
 @Entity
@@ -31,10 +33,13 @@ public class Trade {
     @JoinColumn(name = "user_id")
     private User user;
 
+
+    @Builder.Default
     @OneToMany(mappedBy = "trade", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TradeImage> images = new ArrayList<>();
 
     @Column(nullable=false)
+    @Enumerated(EnumType.ORDINAL)
     private Category category;
 
     @Column(nullable=false)
@@ -45,12 +50,13 @@ public class Trade {
 
     @Column(nullable=false)
     private Integer price;
+    @Builder.Default
+    @Column(nullable=false)
+    @Enumerated(EnumType.ORDINAL)
+    private TradeStatus status = TradeStatus.ING;
 
     @Column(nullable=false)
-    private TradeStatus status;
-
-    @Column(nullable=false)
-    private TradeMethod method;
+    private List<TradeMethod> methods;
 
     @Column(nullable=false)
     private String location;
