@@ -65,7 +65,7 @@ public class MatePostService {
                 .build();
     }
 
-    public User getUserById(Long ownerId) {
+    public User getUserById(UUID ownerId) {
         return userRepository.findById(ownerId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
@@ -87,7 +87,7 @@ public class MatePostService {
         return savedPost;
     }
 
-    public MatePost updateMatePost(Long postId, MateDTO dto) {
+    public MatePost updateMatePost(UUID postId, MateDTO dto) {
         MatePost existingPost = findPostById(postId);
         updatePostFromDTO(existingPost, dto);
         existingPost.setUpdatedTimeAt(LocalDateTime.now());
@@ -157,15 +157,7 @@ public class MatePostService {
         matePostStatusRepository.save(existingStatus);
     }
 
-    public List<MatePost> getLatestMatePosts(Long cursorId, int size) {
-        LocalDateTime cursorTime = null;
-
-        if (cursorId != null) {
-            MatePost cursorPost = matePostRepository.findById(cursorId).orElse(null);
-            if (cursorPost != null) {
-                cursorTime = cursorPost.getUpdatedTimeAt();
-            }
-        }
+    public List<MatePost> getLatestMatePosts(LocalDateTime cursorTime, int size) {
         Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "updateTimeAt"));
 
         if (cursorTime == null) {
@@ -175,16 +167,7 @@ public class MatePostService {
         }
     }
 
-    public List<MatePost> getConditionsMatePosts(Long cursorId, MateSearchDTO searchCriteria, int size) {
-        Optional<LocalDateTime> cursorTime;
-
-        if (cursorId != null) {
-            cursorTime = matePostRepository.findById(cursorId)
-                    .map(MatePost::getUpdatedTimeAt);
-        } else {
-            cursorTime = Optional.empty();
-        }
-
+    public List<MatePost> getConditionsMatePosts(LocalDateTime cursorTime, MateSearchDTO searchCriteria, int size) {
         List<MatePost> allPosts = matePostRepository.findAll();
 
         return allPosts.stream()
@@ -204,7 +187,7 @@ public class MatePostService {
                             });
                 })
                 .map(ScoredPost::getPost)
-                .filter(post -> cursorTime.map(time -> post.getUpdatedTimeAt().isBefore(time)).orElse(true))
+                .filter(post -> cursorTime == null || post.getUpdatedTimeAt().isBefore(cursorTime))
                 .limit(size)
                 .collect(Collectors.toList());
     }
@@ -268,7 +251,7 @@ public class MatePostService {
         existingPost.setTeam(dto.getTeam());
     }
 
-    public MatePost findPostById(Long postId) {
+    public MatePost findPostById(UUID postId) {
         Optional<MatePost> optionalPost = matePostRepository.findById(postId);
         return optionalPost.orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
     }

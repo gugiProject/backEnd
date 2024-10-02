@@ -17,19 +17,21 @@ import com.boot.gugi.repository.MatePostRepository;
 import com.boot.gugi.repository.MatePostStatusRepository;
 import com.boot.gugi.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @Transactional
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
+@Nested
+@DisplayName("직관 메이트 테스트")
 public class MateServiceTest {
 
     @Autowired
@@ -121,7 +123,7 @@ public class MateServiceTest {
                 LocalDate.now().plusDays(1), Stadium.DAEGU,
                 GenderPreference.FEMALE_ONLY, AgeGroup.AGE_20s, Team.SAMSUNG, owner);
 
-        Long postId = createdPost.getId();
+        UUID postId = createdPost.getId();
         MateDTO updateDto = new MateDTO();
         updateDto.setTitle("Updated Title");
         updateDto.setContent("Updated Content");

@@ -12,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/mate")
@@ -23,7 +25,7 @@ public class MatePostController {
 
     @PostMapping
     public ResponseEntity<MateDTO> createMatePost(
-            @RequestHeader("User-ID") Long ownerId,
+            @RequestHeader("User-ID") UUID ownerId,
             @RequestBody MateDTO mateDTO) {
 
         User owner = mateService.getUserById(ownerId);
@@ -33,14 +35,14 @@ public class MatePostController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> updateMatePost(@PathVariable Long id, @RequestBody MateDTO mateDTO) {
+    public ResponseEntity<Void> updateMatePost(@PathVariable UUID id, @RequestBody MateDTO mateDTO) {
         mateService.updateMatePost(id, mateDTO);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/latest")
     public ResponseEntity<List<MatePost>> latestSortMatePost(
-            @RequestParam(required = false) Long cursorId,
+            @RequestParam(required = false) LocalDateTime cursorId,
             @RequestParam(required = false, defaultValue = "15") int size) {
         List<MatePost> posts = mateService.getLatestMatePosts(cursorId, size);
         return ResponseEntity.ok(posts);
@@ -48,7 +50,7 @@ public class MatePostController {
 
     @PostMapping("/conditions")
     public ResponseEntity<List<MatePost>> conditionSortMatePost(
-            @RequestParam(required = false) Long cursorId,
+            @RequestParam(required = false) LocalDateTime cursorId,
             @RequestBody MateSearchDTO searchCriteria,
             @RequestParam(defaultValue = "15") int size) {
 

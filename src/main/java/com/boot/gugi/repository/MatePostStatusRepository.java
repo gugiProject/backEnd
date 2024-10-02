@@ -8,10 +8,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface MatePostStatusRepository extends JpaRepository<MatePostStatus, Long> {
+public interface MatePostStatusRepository extends JpaRepository<MatePostStatus, UUID> {
     List<MatePostStatus> findByUser(User user);
-
     Optional<MatePostStatus> findByUserAndMatePost(User user, MatePost matePost);
 }

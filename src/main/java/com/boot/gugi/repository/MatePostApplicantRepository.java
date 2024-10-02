@@ -7,8 +7,9 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface MatePostApplicantRepository extends JpaRepository<MatePostApplicant, Long> {
-    Optional<MatePostApplicant> findByApplicantIdAndMatePostId(Long userId, Long postId);
+public interface MatePostApplicantRepository extends JpaRepository<MatePostApplicant, UUID> {
+    Optional<MatePostApplicant> findByApplicantIdAndMatePostId(UUID userId, UUID postId);
 }

@@ -10,20 +10,25 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "mate_posts")
+@Table(name = "mate_post")
 public class MatePost {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name="uuid2", strategy = "uuid2")
+    @Column(columnDefinition = "BINARY(16)")
+    private UUID id;
+
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
