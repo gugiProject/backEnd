@@ -67,14 +67,13 @@ public class MateServiceTest {
         return userRepository.save(user);
     }
 
-    private MateDTO createMateDTO(String title, String content, String contact, int participants,
+    private MateDTO createMateDTO(String title, String content, String contact,
                                   int totalMembers, LocalDate gameDate, Stadium stadium,
                                   GenderPreference gender, AgeGroup ageGroup, Team team) {
         MateDTO dto = new MateDTO();
         dto.setTitle(title);
         dto.setContent(content);
         dto.setContact(contact);
-        dto.setParticipants(participants);
         dto.setTotalMembers(totalMembers);
         dto.setGameDate(gameDate);
         dto.setStadium(stadium);
@@ -84,10 +83,10 @@ public class MateServiceTest {
         return dto;
     }
 
-    private MatePost createMatePost(String title, String content, String contact, int participants,
+    private MatePost createMatePost(String title, String content, String contact,
                                     int totalMembers, LocalDate gameDate, Stadium stadium,
                                     GenderPreference gender, AgeGroup ageGroup, Team team, User owner) {
-        MateDTO dto = createMateDTO(title, content, contact, participants, totalMembers, gameDate, stadium, gender, ageGroup, team);
+        MateDTO dto = createMateDTO(title, content, contact, totalMembers, gameDate, stadium, gender, ageGroup, team);
         return matePostService.createMatePost(dto, owner);
     }
 
@@ -95,7 +94,7 @@ public class MateServiceTest {
     @DisplayName("직관메이트 글 생성")
     public void createMatePostTest() {
         // Given
-        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 0, 4,
+        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 4,
                 LocalDate.now().plusDays(1), Stadium.DAEGU,
                 GenderPreference.FEMALE_ONLY, AgeGroup.AGE_20s, Team.SAMSUNG, owner);
 
@@ -119,7 +118,7 @@ public class MateServiceTest {
     @DisplayName("직관메이트 글 수정")
     public void updateMatePostTest() {
         // Given
-        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 0, 4,
+        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 4,
                 LocalDate.now().plusDays(1), Stadium.DAEGU,
                 GenderPreference.FEMALE_ONLY, AgeGroup.AGE_20s, Team.SAMSUNG, owner);
 
@@ -151,7 +150,7 @@ public class MateServiceTest {
     @DisplayName("직관메이트 매칭 신청")
     public void applyForMatePostTest() {
         // Given
-        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 0, 4,
+        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 4,
                 LocalDate.now().plusDays(1), Stadium.DAEGU,
                 GenderPreference.FEMALE_ONLY, AgeGroup.AGE_20s, Team.SAMSUNG, owner);
 
@@ -181,7 +180,7 @@ public class MateServiceTest {
     @DisplayName("직관메이트 매칭 신청 - 본인 글 신청 에러")
     public void applyForMatePost_OwnerCannotApplyTest() {
         // Given
-        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 0, 4,
+        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 4,
                 LocalDate.now().plusDays(1), Stadium.DAEGU,
                 GenderPreference.FEMALE_ONLY, AgeGroup.AGE_20s, Team.SAMSUNG, owner);
 
@@ -199,7 +198,7 @@ public class MateServiceTest {
     @DisplayName("직관메이트 매칭 승인")
     public void approveApplicationTest() {
         // Given
-        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 0, 4,
+        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 4,
                 LocalDate.now().plusDays(1), Stadium.DAEGU,
                 GenderPreference.FEMALE_ONLY, AgeGroup.AGE_20s, Team.SAMSUNG, owner);
 
@@ -231,7 +230,7 @@ public class MateServiceTest {
     @DisplayName("직관메이트 신청 승인 - 모집 완료 에러")
     public void approveApplication_PostFullTest() {
         // Given
-        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 0, 4,
+        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 4,
                 LocalDate.now().plusDays(1), Stadium.DAEGU,
                 GenderPreference.FEMALE_ONLY, AgeGroup.AGE_20s, Team.SAMSUNG, owner);
 
@@ -255,7 +254,7 @@ public class MateServiceTest {
     @DisplayName("직관메이트 신청 거절")
     public void rejectApplicationTest() {
         // Given
-        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 0, 4,
+        createdPost = createMatePost("Match Title", "Match Content", "contact@example.com", 4,
                 LocalDate.now().plusDays(1), Stadium.DAEGU,
                 GenderPreference.FEMALE_ONLY, AgeGroup.AGE_20s, Team.SAMSUNG, owner);
 

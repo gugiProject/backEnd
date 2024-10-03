@@ -25,7 +25,7 @@ public class MateDTO {
 
     private Team team;
 
-    private Integer participants;
+    //private Integer participants;
 
     private Integer totalMembers;
 

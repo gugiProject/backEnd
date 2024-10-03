@@ -59,7 +59,6 @@ public class MatePost {
                 this.age,
                 this.gameDate,
                 this.team,
-                this.participants,
                 this.totalMembers,
                 this.stadium,
                 this.title,

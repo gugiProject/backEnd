@@ -50,7 +50,6 @@ public class MatePostService {
     private MatePost fromDTO(MateDTO dto, User owner) {
         return MatePost.builder()
                 .owner(owner)
-                .participants(dto.getParticipants())
                 .totalMembers(dto.getTotalMembers())
                 .gameDate(dto.getGameDate())
                 .stadium(dto.getStadium())
