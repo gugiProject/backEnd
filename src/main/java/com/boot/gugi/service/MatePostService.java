@@ -1,9 +1,10 @@
 package com.boot.gugi.service;
 
-import com.boot.gugi.base.Enum.MateStatus;
+import com.boot.gugi.base.Enum.*;
 import com.boot.gugi.base.dto.MateRequestDTO;
 import com.boot.gugi.base.dto.MateResponseDTO;
 import com.boot.gugi.base.dto.MateSearchDTO;
+import com.boot.gugi.base.util.TranslationUtil;
 import com.boot.gugi.exception.MatePostException;
 import com.boot.gugi.model.MatePostApplicant;
 import com.boot.gugi.model.MatePostStatus;
@@ -47,26 +48,14 @@ public class MatePostService {
         this.applicantRepository = applicantRepository;
     }
 
-    private MatePost fromDTO(MateDTO dto, User owner) {
-        return MatePost.builder()
-                .owner(owner)
-                .totalMembers(dto.getTotalMembers())
-                .gameDate(dto.getGameDate())
-                .stadium(dto.getStadium())
-                .title(dto.getTitle())
-                .content(dto.getContent())
-                .contact(dto.getContact())
-                .gender(dto.getGender())
-                .age(dto.getAgeGroup())
-                .team(dto.getTeam())
-                .createdTimeAt(LocalDateTime.now())
-                .updatedTimeAt(LocalDateTime.now())
-                .build();
-    }
-
     public User getUserById(UUID ownerId) {
         return userRepository.findById(ownerId)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
+    }
+
+    public MatePost findPostById(UUID postId) {
+        Optional<MatePost> optionalPost = matePostRepository.findById(postId);
+        return optionalPost.orElseThrow(() -> new RuntimeException("Post not found"));
     }
 
     public MatePost createMatePost(MateDTO dto, User owner) {
@@ -237,21 +226,58 @@ public class MatePostService {
         }
     }
 
-    private void updatePostFromDTO(MatePost existingPost, MateDTO dto) {
+    private MatePost fromDTO(MateDTO dto, User owner) {
 
-        existingPost.setTotalMembers(dto.getTotalMembers());
-        existingPost.setGameDate(dto.getGameDate());
-        existingPost.setStadium(dto.getStadium());
+        GenderPreference genderPreference = TranslationUtil.fromKorean(dto.getGender(), GenderPreference.class);
+        if (genderPreference == null) { genderPreference = GenderPreference.ANY; }
+
+        AgeGroup age = TranslationUtil.fromKorean(dto.getAgeGroup(), AgeGroup.class);
+        if (age == null) { age = AgeGroup.ANY; }
+
+        Team team = TranslationUtil.fromKorean(dto.getTeam(), Team.class);
+        if (team == null) { team = Team.ANY; }
+
+        Stadium stadium = TranslationUtil.fromKorean(dto.getStadium(), Stadium.class);
+        if (stadium == null) { stadium = Stadium.ANY; }
+
+        return MatePost.builder()
+                .owner(owner)
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .contact(dto.getContact())
+                .totalMembers(dto.getTotalMembers())
+                .gameDate(dto.getGameDate())
+                .gender(TranslationUtil.toEnglish(genderPreference))
+                .age(TranslationUtil.toEnglish(age))
+                .team(TranslationUtil.toEnglish(team))
+                .stadium(TranslationUtil.toEnglish(stadium))
+                .createdTimeAt(LocalDateTime.now())
+                .updatedTimeAt(LocalDateTime.now())
+                .build();
+    }
+
+    private void updatePostFromDTO(MatePost existingPost, MateDTO dto) {
+        GenderPreference genderPreference = TranslationUtil.fromKorean(dto.getGender(), GenderPreference.class);
+        if (genderPreference == null) { genderPreference = GenderPreference.ANY; }
+
+        AgeGroup age = TranslationUtil.fromKorean(dto.getAgeGroup(), AgeGroup.class);
+        if (age == null) { age = AgeGroup.ANY; }
+
+        Team team = TranslationUtil.fromKorean(dto.getTeam(), Team.class);
+        if (team == null) { team = Team.ANY; }
+
+        Stadium stadium = TranslationUtil.fromKorean(dto.getStadium(), Stadium.class);
+        if (stadium == null) { stadium = Stadium.ANY; }
+
         existingPost.setTitle(dto.getTitle());
         existingPost.setContent(dto.getContent());
         existingPost.setContact(dto.getContact());
-        existingPost.setGender(dto.getGender());
-        existingPost.setAge(dto.getAgeGroup());
-        existingPost.setTeam(dto.getTeam());
+        existingPost.setTotalMembers(dto.getTotalMembers());
+        existingPost.setGameDate(dto.getGameDate());
+        existingPost.setGender(TranslationUtil.toEnglish(genderPreference));
+        existingPost.setAge(TranslationUtil.toEnglish(age));
+        existingPost.setTeam(TranslationUtil.toEnglish(team));
+        existingPost.setStadium(TranslationUtil.toEnglish(stadium));
     }
 
-    public MatePost findPostById(UUID postId) {
-        Optional<MatePost> optionalPost = matePostRepository.findById(postId);
-        return optionalPost.orElseThrow(() -> new RuntimeException("Post not found with id: " + postId));
-    }
 }

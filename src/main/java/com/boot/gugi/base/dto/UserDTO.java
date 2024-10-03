@@ -1,17 +1,21 @@
 package com.boot.gugi.base.dto;
 
-import com.boot.gugi.base.Enum.Sex;
-import com.boot.gugi.base.Enum.Team;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserDTO {
     private String name;
     private String nickName;
     private String email;
-    private Sex gender;
+    private String gender;
     private Integer age;
-    private Team team;
+    private String team;
     private String profileImg;
     private String introduction;
 }

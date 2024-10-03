@@ -5,6 +5,7 @@ import com.boot.gugi.base.Enum.GenderPreference;
 import com.boot.gugi.base.Enum.Stadium;
 import com.boot.gugi.base.Enum.Team;
 import com.boot.gugi.base.dto.MateDTO;
+import com.boot.gugi.base.util.TranslationUtil;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,30 +41,34 @@ public class MatePost {
     private String contact;
     private LocalDateTime createdTimeAt;
     private LocalDateTime updatedTimeAt;
-
-    @Enumerated(EnumType.STRING)
-    private GenderPreference gender;
-
-    @Enumerated(EnumType.STRING)
-    private AgeGroup age;
-
-    @Enumerated(EnumType.STRING)
-    private Team team;
-
-    @Enumerated(EnumType.STRING)
-    private Stadium stadium;
+    private String gender;
+    private String age;
+    private String team;
+    private String stadium;
 
     public MateDTO toDTO() {
+        GenderPreference genderPreference = TranslationUtil.fromEnglish(this.gender, GenderPreference.class);
+        String genderKorean = (genderPreference != null) ? genderPreference.toKorean() : "상관없음";
+
+        AgeGroup age = TranslationUtil.fromEnglish(this.gender, AgeGroup.class);
+        String ageKorean = (age != null) ? age.toKorean() : "상관없음";
+
+        Team team = TranslationUtil.fromEnglish(this.gender, Team.class);
+        String teamKorean = (team != null) ? team.toKorean() : "상관없음";
+
+        Stadium stadium = TranslationUtil.fromEnglish(this.gender, Stadium.class);
+        String stadiumKorean = (stadium != null) ? stadium.toKorean() : "상관없음";
+
         return new MateDTO(
-                this.gender,
-                this.age,
-                this.gameDate,
-                this.team,
-                this.totalMembers,
-                this.stadium,
                 this.title,
                 this.content,
-                this.contact
+                this.contact,
+                this.totalMembers,
+                this.gameDate,
+                genderKorean,
+                ageKorean,
+                teamKorean,
+                stadiumKorean
         );
     }
 }

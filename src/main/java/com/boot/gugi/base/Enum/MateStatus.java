@@ -1,19 +1,28 @@
 package com.boot.gugi.base.Enum;
 
-public enum MateStatus {
-    CREATOR,
-    PENDING,
-    APPROVED,
-    REJECTED;
+import com.boot.gugi.model.Translate;
+
+public enum MateStatus implements Translate {
+    CREATOR("방장", "CREATOR"),
+    PENDING("대기", "PENDING"),
+    APPROVED("수락", "APPROVED"),
+    REJECTED("거절", "REJECTED");
+
+    private final String displayNameKorean;
+    private final String displayNameEnglish;
+
+    MateStatus(String displayNameKorean, String displayNameEnglish) {
+        this.displayNameKorean = displayNameKorean;
+        this.displayNameEnglish = displayNameEnglish;
+    }
 
     @Override
-    public String toString() {
-        switch (this) {
-            case CREATOR: return "방장";
-            case PENDING: return "대기";
-            case APPROVED: return "승인";
-            case REJECTED: return "거부";
-            default: throw new IllegalArgumentException();
-        }
+    public String toEnglish() {
+        return displayNameEnglish;
+    }
+
+    @Override
+    public String toKorean() {
+        return displayNameKorean;
     }
 }

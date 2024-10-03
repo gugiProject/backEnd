@@ -70,4 +70,5 @@ clean {	delete file('build/generated')}
 /*
 tasks.named('test') {
 	useJUnitPlatform()
-}*/
+}
+ */

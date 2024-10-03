@@ -1,7 +1,8 @@
 package com.boot.gugi.model;
 
-import com.boot.gugi.base.Enum.Sex;
-import com.boot.gugi.base.Enum.Team;
+import com.boot.gugi.base.Enum.*;
+import com.boot.gugi.base.dto.UserDTO;
+import com.boot.gugi.base.util.TranslationUtil;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,15 +38,13 @@ public class User {
     private String email;
 
     @Column(nullable=false)
-    @Enumerated(EnumType.STRING)
-    private Sex gender;
+    private String gender;
 
     @Column(nullable=false)
     private Integer age;
 
     @Column
-    @Enumerated(EnumType.STRING)
-    private Team team;
+    private String team;
 
     @Column
     private String profileImg;
@@ -59,4 +58,35 @@ public class User {
     @OneToMany(mappedBy = "applicant")
     private List<MatePostApplicant> applicants;
 
+    public UserDTO toDTO() {
+
+        if (this.gender == null || this.gender.isEmpty()) {
+            throw new IllegalArgumentException("성별 값이 유효하지 않습니다.");
+        }
+        Sex gender = TranslationUtil.fromEnglish(this.gender, Sex.class);
+        if (gender == null) {
+            throw new IllegalArgumentException("유효하지 않은 성별 값: " + this.gender);
+        }
+        String genderKorean = gender.toKorean();
+
+        if (this.team == null || this.team.isEmpty()) {
+            throw new IllegalArgumentException("팀 값이 유효하지 않습니다.");
+        }
+        Team team = TranslationUtil.fromEnglish(this.team, Team.class);
+        if (team == null) {
+            throw new IllegalArgumentException("유효하지 않은 팀 값: " + this.team);
+        }
+        String teamKorean = team.toKorean();
+
+        return new UserDTO(
+                this.name,
+                this.nickName,
+                this.email,
+                genderKorean,
+                this.age,
+                teamKorean,
+                this.profileImg,
+                this.introduction
+        );
+    }
 }
