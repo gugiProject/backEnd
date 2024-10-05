@@ -10,7 +10,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -85,7 +84,6 @@ public class User {
                 genderKorean,
                 this.age,
                 teamKorean,
-                this.profileImg,
                 this.introduction
         );
     }

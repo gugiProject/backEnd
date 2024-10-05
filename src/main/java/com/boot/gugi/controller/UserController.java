@@ -1,14 +1,17 @@
 package com.boot.gugi.controller;
 
 import com.boot.gugi.base.dto.UserDTO;
-import com.boot.gugi.model.User;
 import com.boot.gugi.service.UserService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -16,9 +19,20 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody UserDTO userDTO) {
-        User createdUser = userService.createUser(userDTO);
-        return ResponseEntity.status(201).body(createdUser);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> createUser(
+            @RequestPart("userDTO") @Valid String userDTOJson,
+            @RequestPart("profileImg") MultipartFile profileImg) {
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        UserDTO userDTO;
+        try {
+            userDTO = objectMapper.readValue(userDTOJson, UserDTO.class);
+        } catch (IOException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        userService.createUser(userDTO,profileImg);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
