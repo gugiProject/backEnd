@@ -12,4 +12,6 @@ import java.util.UUID;
 @Repository
 public interface MatePostApplicantRepository extends JpaRepository<MatePostApplicant, UUID> {
     Optional<MatePostApplicant> findByApplicantIdAndMatePostId(UUID userId, UUID postId);
+    List<MatePostApplicant> findByOwnerId(UUID ownerId);
+    List<MatePostApplicant> findByApplicantId(UUID applicantId);
 }

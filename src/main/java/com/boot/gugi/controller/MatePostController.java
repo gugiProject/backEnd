@@ -1,11 +1,9 @@
 package com.boot.gugi.controller;
 
-import com.boot.gugi.base.dto.MateRequestDTO;
-import com.boot.gugi.base.dto.MateResponseDTO;
+import com.boot.gugi.base.dto.*;
 import com.boot.gugi.model.MatePost;
-import com.boot.gugi.base.dto.MateDTO;
-import com.boot.gugi.base.dto.MateSearchDTO;
 import com.boot.gugi.model.User;
+import com.boot.gugi.service.MateNotificationService;
 import com.boot.gugi.service.MatePostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,15 +21,17 @@ public class MatePostController {
     @Autowired
     private MatePostService mateService;
 
+    @Autowired
+    private MateNotificationService mateNotificationService;
+
     @PostMapping
     public ResponseEntity<MateDTO> createMatePost(
             @RequestHeader("User-ID") UUID ownerId,
             @RequestBody MateDTO mateDTO) {
 
         User owner = mateService.getUserById(ownerId);
-
-        MatePost createdPost = mateService.createMatePost(mateDTO, owner);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdPost.toDTO());
+        mateService.createMatePost(mateDTO, owner);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PatchMapping("/{id}")
@@ -64,7 +64,7 @@ public class MatePostController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @PatchMapping("/approve")
+    @PatchMapping("/accept")
     public ResponseEntity<Void> approveApplication(@RequestBody MateResponseDTO response) {
         mateService.approveApplication(response);
         return ResponseEntity.ok().build();
@@ -74,5 +74,10 @@ public class MatePostController {
     public ResponseEntity<Void> rejectApplication(@RequestBody MateResponseDTO response) {
         mateService.rejectApplication(response);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/notifications/{userId}")
+    public NotificationResponseDTO getNotifications(@PathVariable UUID userId) {
+        return mateNotificationService.getNotifications(userId);
     }
 }
