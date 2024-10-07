@@ -21,4 +21,5 @@ public class MateDTO {
     private String ageGroup;
     private String team;
     private String stadium;
+    private String ownerProfileImg;
 }

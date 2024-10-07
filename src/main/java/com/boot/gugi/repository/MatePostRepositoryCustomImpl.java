@@ -3,37 +3,49 @@ package com.boot.gugi.repository;
 import com.boot.gugi.model.MatePost;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.boot.gugi.base.dto.MateDTO;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.boot.gugi.model.QMatePost.matePost;
+import static com.boot.gugi.model.QUser.user;
 
 @Repository
 public class MatePostRepositoryCustomImpl implements MatePostRepositoryCustom {
 
-    @Autowired
-    private EntityManager entityManager;
+    private final JPAQueryFactory queryFactory;
+
+    public MatePostRepositoryCustomImpl(EntityManager entityManager) {
+        this.queryFactory = new JPAQueryFactory(entityManager);
+    }
 
     @Override
-    public List<MatePost> findByUpdatedTimeAt(LocalDateTime cursorTime, Pageable pageable) {
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<MatePost> query = cb.createQuery(MatePost.class);
-        Root<MatePost> root = query.from(MatePost.class);
+    public List<MateDTO> findByUpdatedTimeAt(LocalDateTime cursorTime, Pageable pageable) {
+        List<MatePost> posts = queryFactory.selectFrom(matePost)
+                .join(matePost.owner, user)
+                .where(matePost.updatedTimeAt.lt(cursorTime))
+                .orderBy(matePost.updatedTimeAt.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
 
-        query.select(root)
-                .where(cb.lessThan(root.get("updateTimeAt"), cursorTime))
-                .orderBy(cb.desc(root.get("updateTimeAt")));
-
-        return entityManager.createQuery(query)
-                .setFirstResult(pageable.getPageNumber() * pageable.getPageSize())
-                .setMaxResults(pageable.getPageSize())
-                .getResultList();
+        return posts.stream()
+                .map(post -> MateDTO.builder()
+                        .title(post.getTitle())
+                        .content(post.getContent())
+                        .contact(post.getContact())
+                        .totalMembers(post.getTotalMembers())
+                        .gameDate(post.getGameDate())
+                        .gender(post.getGender())
+                        .ageGroup(post.getAge())
+                        .team(post.getTeam())
+                        .stadium(post.getStadium())
+                        .ownerProfileImg(post.getOwner().getProfileImg())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

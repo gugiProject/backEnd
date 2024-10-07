@@ -5,6 +5,8 @@ import com.boot.gugi.model.MatePost;
 import com.boot.gugi.model.User;
 import com.boot.gugi.service.MateNotificationService;
 import com.boot.gugi.service.MatePostService;
+import com.boot.gugi.service.MateSortService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +22,15 @@ public class MatePostController {
 
     @Autowired
     private MatePostService mateService;
-
+    @Autowired
+    private MateSortService mateSortService;
     @Autowired
     private MateNotificationService mateNotificationService;
 
     @PostMapping
     public ResponseEntity<MateDTO> createMatePost(
             @RequestHeader("User-ID") UUID ownerId,
-            @RequestBody MateDTO mateDTO) {
+            @RequestBody @Valid MateDTO mateDTO) {
 
         User owner = mateService.getUserById(ownerId);
         mateService.createMatePost(mateDTO, owner);
@@ -41,10 +44,12 @@ public class MatePostController {
     }
 
     @GetMapping("/latest")
-    public ResponseEntity<List<MatePost>> latestSortMatePost(
+    public ResponseEntity<List<MateDTO>> latestSortMatePost(
             @RequestParam(required = false) LocalDateTime cursorId,
             @RequestParam(required = false, defaultValue = "15") int size) {
-        List<MatePost> posts = mateService.getLatestMatePosts(cursorId, size);
+
+        List<MateDTO> posts = mateSortService.getLatestMatePosts(cursorId, size);
+
         return ResponseEntity.ok(posts);
     }
 
@@ -54,7 +59,7 @@ public class MatePostController {
             @RequestBody MateSearchDTO searchCriteria,
             @RequestParam(defaultValue = "15") int size) {
 
-        List<MatePost> posts = mateService.getConditionsMatePosts(cursorId, searchCriteria, size);
+        List<MatePost> posts = mateSortService.getConditionsMatePosts(cursorId, searchCriteria, size);
         return ResponseEntity.ok(posts);
     }
 

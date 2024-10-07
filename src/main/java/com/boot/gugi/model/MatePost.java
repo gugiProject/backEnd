@@ -59,16 +59,17 @@ public class MatePost {
         Stadium stadium = TranslationUtil.fromEnglish(this.gender, Stadium.class);
         String stadiumKorean = (stadium != null) ? stadium.toKorean() : "상관없음";
 
-        return new MateDTO(
-                this.title,
-                this.content,
-                this.contact,
-                this.totalMembers,
-                this.gameDate,
-                genderKorean,
-                ageKorean,
-                teamKorean,
-                stadiumKorean
-        );
+        return MateDTO.builder()
+                .title(this.title)
+                .content(this.content)
+                .contact(this.contact)
+                .totalMembers(this.totalMembers)
+                .gameDate(this.gameDate)
+                .gender(genderKorean)
+                .ageGroup(ageKorean)
+                .team(teamKorean)
+                .stadium(stadiumKorean)
+                .ownerProfileImg(owner.getProfileImg())
+                .build();
     }
 }
