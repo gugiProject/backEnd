@@ -5,7 +5,7 @@ import com.boot.gugi.model.Translate;
 public enum MateStatus implements Translate {
     CREATOR("방장", "CREATOR"),
     PENDING("대기", "PENDING"),
-    APPROVED("수락", "APPROVED"),
+    ACCEPTED("수락", "ACCEPTED"),
     REJECTED("거절", "REJECTED");
 
     private final String displayNameKorean;
