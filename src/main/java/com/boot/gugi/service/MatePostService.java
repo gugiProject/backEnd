@@ -3,7 +3,6 @@ package com.boot.gugi.service;
 import com.boot.gugi.base.Enum.*;
 import com.boot.gugi.base.dto.MateRequestDTO;
 import com.boot.gugi.base.dto.MateResponseDTO;
-import com.boot.gugi.base.dto.MateSearchDTO;
 import com.boot.gugi.base.util.TranslationUtil;
 import com.boot.gugi.exception.MatePostException;
 import com.boot.gugi.model.MatePostApplicant;
@@ -15,20 +14,15 @@ import com.boot.gugi.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class MatePostService {
 
     private final MatePostRepository matePostRepository;
-    private final MatePostRepositoryCustom matePostRepositoryCustom;
     private final MatePostStatusRepository matePostStatusRepository;
     private final UserRepository userRepository;
     private final MatePostApplicantRepository applicantRepository;
@@ -37,12 +31,10 @@ public class MatePostService {
 
     @Autowired
     public MatePostService(@Qualifier("matePostRepository") MatePostRepository mateRepository,
-                           @Qualifier("matePostRepositoryCustomImpl") MatePostRepositoryCustom matePostRepositoryCustom,
                            MatePostStatusRepository matePostStatusRepository,
                            UserRepository userRepository,
                            MatePostApplicantRepository applicantRepository) {
         this.matePostRepository = mateRepository;
-        this.matePostRepositoryCustom = matePostRepositoryCustom;
         this.matePostStatusRepository = matePostStatusRepository;
         this.userRepository = userRepository;
         this.applicantRepository = applicantRepository;
@@ -143,87 +135,6 @@ public class MatePostService {
 
         existingStatus.setPostStatus(MateStatus.REJECTED);
         matePostStatusRepository.save(existingStatus);
-    }
-
-    public List<MatePost> getLatestMatePosts(LocalDateTime cursorTime, int size) {
-        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "updatedTimeAt"));
-
-        if (cursorTime == null) {
-            return matePostRepository.findAll(pageable).getContent();
-        } else {
-            return matePostRepositoryCustom.findByUpdatedTimeAt(cursorTime, pageable);
-        }
-    }
-
-    public List<MatePost> getConditionsMatePosts(LocalDateTime cursorTime, MateSearchDTO searchCriteria, int size) {
-        List<MatePost> allPosts = matePostRepository.findAll();
-
-        return allPosts.stream()
-                .map(post -> new ScoredPost(post, countMatchingConditions(post, searchCriteria), calculateScore(post, searchCriteria)))
-                .collect(Collectors.groupingBy(ScoredPost::getMatchCount))
-                .entrySet().stream()
-                .sorted(Map.Entry.<Integer, List<ScoredPost>>comparingByKey().reversed())
-                .flatMap(entry -> {
-                    List<ScoredPost> scoredPosts = entry.getValue();
-                    scoredPosts.sort(Comparator.comparingInt(ScoredPost::getScore).reversed());
-                    return scoredPosts.stream()
-                            .collect(Collectors.groupingBy(ScoredPost::getScore))
-                            .values().stream()
-                            .flatMap(group -> {
-                                Collections.shuffle(group);
-                                return group.stream();
-                            });
-                })
-                .map(ScoredPost::getPost)
-                .filter(post -> cursorTime == null || post.getUpdatedTimeAt().isBefore(cursorTime))
-                .limit(size)
-                .collect(Collectors.toList());
-    }
-
-    private int countMatchingConditions(MatePost post, MateSearchDTO searchCriteria) {
-        int count = 0;
-        if (searchCriteria.getGameDate() != null && searchCriteria.getGameDate().equals(post.getGameDate())) count++;
-        if (searchCriteria.getGender() != null && searchCriteria.getGender().equals(post.getGender())) count++;
-        if (searchCriteria.getAgeGroup() != null && searchCriteria.getAgeGroup().equals(post.getAge())) count++;
-        if (searchCriteria.getTeam() != null && searchCriteria.getTeam().equals(post.getTeam())) count++;
-        if (searchCriteria.getTotalMembers() != 0 && searchCriteria.getTotalMembers() == post.getTotalMembers()) count++;
-        if (searchCriteria.getStadium() != null && searchCriteria.getStadium().equals(post.getStadium())) count++;
-        return count;
-    }
-
-    private int calculateScore(MatePost post, MateSearchDTO searchCriteria) {
-        int score = 0;
-        if (searchCriteria.getGameDate() != null && searchCriteria.getGameDate().equals(post.getGameDate())) score += 5;
-        if (searchCriteria.getGender() != null && searchCriteria.getGender().equals(post.getGender())) score += 4;
-        if (searchCriteria.getAgeGroup() != null && searchCriteria.getAgeGroup().equals(post.getAge())) score += 3;
-        if (searchCriteria.getTeam() != null && searchCriteria.getTeam().equals(post.getTeam())) score += 2;
-        if (searchCriteria.getTotalMembers() != 0 && searchCriteria.getTotalMembers() == post.getTotalMembers()) score += 1;
-        if (searchCriteria.getStadium() != null && searchCriteria.getStadium().equals(post.getStadium())) score += 1;
-        return score;
-    }
-
-    private static class ScoredPost {
-        private final MatePost post;
-        private final int matchCount;
-        private final int score;
-
-        public ScoredPost(MatePost post, int matchCount, int score) {
-            this.post = post;
-            this.matchCount = matchCount;
-            this.score = score;
-        }
-
-        public MatePost getPost() {
-            return post;
-        }
-
-        public int getMatchCount() {
-            return matchCount;
-        }
-
-        public int getScore() {
-            return score;
-        }
     }
 
     private MatePost fromDTO(MateDTO dto, User owner) {
