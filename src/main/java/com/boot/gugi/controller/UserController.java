@@ -22,7 +22,7 @@ public class UserController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> createUser(
             @RequestPart("userDTO") @Valid String userDTOJson,
-            @RequestPart("profileImg") MultipartFile profileImg) {
+            @RequestPart(value = "profileImg", required = false) MultipartFile profileImg) {
 
         ObjectMapper objectMapper = new ObjectMapper();
         UserDTO userDTO;
