@@ -119,7 +119,7 @@ public class MatePostService {
             throw new MatePostException("모집이 이미 완료되었습니다. 더 이상 신청을 승인할 수 없습니다.");
         }
 
-        applicant.setStatus(MateStatus.APPROVED);
+        applicant.setStatus(MateStatus.ACCEPTED);
         applicantRepository.save(applicant);
         matePost.setParticipants(matePost.getParticipants() + 1);
         matePostRepository.save(matePost);
@@ -127,7 +127,7 @@ public class MatePostService {
         MatePostStatus existingStatus = matePostStatusRepository.findByUserAndMatePost(applicant.getApplicant(), matePost)
                 .orElseThrow(() -> new MatePostException("게시물 상태가 존재하지 않습니다."));
 
-        existingStatus.setPostStatus(MateStatus.APPROVED);
+        existingStatus.setPostStatus(MateStatus.ACCEPTED);
         matePostStatusRepository.save(existingStatus);
     }
 
@@ -146,7 +146,7 @@ public class MatePostService {
     }
 
     public List<MatePost> getLatestMatePosts(LocalDateTime cursorTime, int size) {
-        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "updateTimeAt"));
+        Pageable pageable = PageRequest.of(0, size, Sort.by(Sort.Direction.DESC, "updatedTimeAt"));
 
         if (cursorTime == null) {
             return matePostRepository.findAll(pageable).getContent();

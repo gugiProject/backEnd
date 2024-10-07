@@ -13,10 +13,7 @@ import com.boot.gugi.model.MatePost;
 import com.boot.gugi.model.MatePostApplicant;
 import com.boot.gugi.model.MatePostStatus;
 import com.boot.gugi.model.User;
-import com.boot.gugi.repository.MatePostApplicantRepository;
-import com.boot.gugi.repository.MatePostRepository;
-import com.boot.gugi.repository.MatePostStatusRepository;
-import com.boot.gugi.repository.UserRepository;
+import com.boot.gugi.repository.*;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +22,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @ExtendWith(SpringExtension.class)
@@ -40,6 +39,9 @@ public class MateServiceTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private MatePostRepositoryCustom matePostRepositoryCustom;
 
     @Autowired
     private MatePostApplicantRepository applicantRepository;
@@ -261,5 +263,40 @@ public class MateServiceTest {
         assertThat(postStatus).isNotNull();
         assertThat(postStatus.getPostStatus()).isEqualTo(MateStatus.REJECTED);
     }
+
+    @Test
+    @DisplayName("커서 기반 최신 포스트 가져오기 - 커서가 null")
+    public void GetLatestWithoutCursorTest() {
+        // Given
+        int size = 5;
+
+        // When
+        List<MatePost> posts = matePostService.getLatestMatePosts(null, size);
+
+        // Then
+        assertThat(posts).isNotNull();
+        assertThat(posts.size()).isLessThanOrEqualTo(size);
+
+    }
+
+    @Test
+    @DisplayName("커서 기반 최신 포스트 가져오기 - 유효한 커서")
+    public void GetLatestWithCursorTest() {
+        // Given
+        LocalDateTime cursorTime = LocalDateTime.now().minusDays(1);
+        int size = 5;
+
+        // When
+        List<MatePost> posts = matePostService.getLatestMatePosts(cursorTime, size);
+
+        // Then
+        assertThat(posts).isNotNull();
+        assertThat(posts.size()).isLessThanOrEqualTo(size);
+
+        for (MatePost post : posts) {
+            assertThat(post.getUpdatedTimeAt()).isBefore(cursorTime);
+        }
+    }
+
 
 }
